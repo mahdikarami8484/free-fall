@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+
 public class Move : MonoBehaviour
 {
 
@@ -15,6 +16,11 @@ public class Move : MonoBehaviour
     void Awake()
     {
         gameInputs = new GameInputs();
+        if (SystemInfo.supportsGyroscope)
+		{
+			Input.gyro.enabled = true;
+			Input.gyro.updateInterval = 0.0167f;
+		}
     }
 
     void OnEnable()
@@ -25,7 +31,8 @@ public class Move : MonoBehaviour
     void Update()
     {
         Fall();
-        move();
+        moveAndroid();
+        movePc();
     }
 
 	void Fall()
@@ -33,12 +40,19 @@ public class Move : MonoBehaviour
         transform.position += -transform.up * Mathf.Clamp(fallSpeed, 0f, fallSpeed + 50f) * Time.deltaTime;
 	}
 
-    void move()
+    void movePc()
     {
         float horizontal = gameInputs.PlayerInput.Horizontal.ReadValue<float>();
         transform.position += transform.right * moveSpeed * horizontal * Time.deltaTime;
         transform.position = new Vector3(Mathf.Clamp(transform.position.x, -2.21f, 2.21f), transform.position.y, transform.position.z); 
     }
 
+
+    void moveAndroid()
+    {
+        float xMovement = Input.gyro.rotationRate.y * Time.deltaTime * moveSpeed;
+        Vector3 movement = new Vector3(Mathf.Clamp(xMovement, -2.21f, 2.21f), 0, 0);
+        transform.Translate(movement);	
+    }
     
 }
